@@ -11,12 +11,7 @@ import (
 	"github.com/funny/link"
 )
 
-// This is an echo client demo work with the echo_server.
-// usage:
-//     go run echo_client/main.go
-
 func main() {
-
 	log.SetFlags(log.Lshortfile)
 	protocol := link.PacketN(2, binary.BigEndian)
 

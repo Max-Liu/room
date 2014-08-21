@@ -15,9 +15,6 @@ var (
 	benchmark = flag.Bool("bench", false, "is for benchmark, will disable print")
 )
 
-// This is an echo server demo work with the echo_client.
-// usage:
-//     go run echo_server/main.go
 func main() {
 	flag.Parse()
 
@@ -63,9 +60,7 @@ func main() {
 		})
 
 		session.OnClose(func(session *link.Session, reason error) {
-			if !*benchmark {
-				println("client", session.Conn().RemoteAddr().String(), "close, ", reason)
-			}
+			println("client", session.Conn().RemoteAddr().String(), "close, ", reason)
 		})
 
 		session.Start()
