@@ -46,7 +46,7 @@ func (l *RpcListener) EndChatRoom(line []byte, reply *[]byte) error {
 			log.Fatal(err)
 		}
 		if serverPortInt == endPortInt {
-			server.Stop()
+			server.Stop("end")
 		}
 	}
 

@@ -53,8 +53,8 @@ func (c *ChatRoom) Start() error {
 	box := Box{}
 	b, _ := json.Marshal(c.SysInfo)
 	fmt.Printf("%s\n", b)
-	go server.Accept(func(session *link.Session) {
-		session.OnMessage(func(session *link.Session, message []byte) {
+	go server.AcceptLoop(func(session *link.Session) {
+		session.ReadLoop(func(message []byte) {
 			json.Unmarshal(message, &box)
 			switch box.Kind {
 			case "user":
@@ -83,10 +83,6 @@ func (c *ChatRoom) Start() error {
 			}
 		})
 
-		session.OnClose(func(session *link.Session, reason error) {
-			println("client", session.Conn().RemoteAddr().String(), "close, ", reason)
-		})
-		session.Start()
 	})
 	go func() {
 		for {

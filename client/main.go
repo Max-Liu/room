@@ -15,21 +15,15 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 	protocol := link.PacketN(2, binary.BigEndian)
 
-	client, err := link.Dial("tcp", "127.0.0.1:10010", protocol)
+	client, err := link.Dial("tcp", "127.0.0.1:52128", protocol)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
 
-	client.OnMessage(func(session *link.Session, message []byte) {
+	go client.ReadLoop(func(message []byte) {
 		println("message:", string(message))
 	})
-
-	client.OnClose(func(session *link.Session, reason error) {
-		println("closed")
-	})
-
-	client.Start()
 
 	user := room.NewUser()
 	fmt.Println("Your Name:")
