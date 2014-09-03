@@ -1,17 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/rpc"
-	"os/exec"
-	"room"
 )
 
-var roomSysInfoList map[int]room.RoomSysInfo
 var client *rpc.Client
 var err error
 
@@ -35,6 +30,7 @@ func EndRoom(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("port %s has closed", string(line))
 	fmt.Fprintf(w, string(*reply))
 }
 
@@ -50,18 +46,4 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-}
-
-func getRoomSysInfo(w http.ResponseWriter, r *http.Request) {
-	cmd := exec.Command("go", "run", "main.go")
-	stdout, _ := cmd.StdoutPipe()
-	cmd.Start()
-	line, _, _ := bufio.NewReader(stdout).ReadLine()
-
-	roomSysInfo := room.RoomSysInfo{}
-	json.Unmarshal(line, &roomSysInfo)
-
-	roomSysInfoList[roomSysInfo.Pid] = roomSysInfo
-
-	fmt.Fprintf(w, string(line))
 }
