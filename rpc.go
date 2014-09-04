@@ -1,9 +1,9 @@
 package room
 
 import (
+	"encoding/json"
 	"log"
 	"strconv"
-	"strings"
 )
 
 type RpcListener struct {
@@ -26,6 +26,26 @@ func NewRpcListener() *RpcListener {
 
 }
 
+func (l *RpcListener) GetRoomNum(line []byte, reply *[]byte) error {
+	RoomNumStr := strconv.Itoa(len(RegRoomList))
+	*reply = []byte(RoomNumStr)
+	return nil
+}
+
+func (l *RpcListener) GetRoomList(line []byte, reply *[]byte) error {
+	var roomInfoList []RoomSysInfo
+	for _, RegRoom := range RegRoomList {
+		var roomInfo RoomSysInfo
+		roomInfo.Addr = RegRoom.State.(RoomSysInfo).Addr
+		roomInfo.Pid = RegRoom.State.(RoomSysInfo).Pid
+		roomInfo.StartTime = RegRoom.State.(RoomSysInfo).StartTime
+		roomInfoList = append(roomInfoList, roomInfo)
+	}
+	jsonByte, err := json.Marshal(roomInfoList)
+	*reply = jsonByte
+	return err
+}
+
 func (l *RpcListener) CreateChatRoom(line []byte, reply *[]byte) error {
 	l.CreateNewRoom <- 1
 	<-l.HasCreatedRoom
@@ -39,16 +59,8 @@ func (l *RpcListener) EndChatRoom(line []byte, reply *[]byte) error {
 		log.Fatal(err)
 	}
 
-	for _, server := range RegRoomList {
-		serverPortStr := strings.Split(server.Listener().Addr().String(), ":")[1]
-		serverPortInt, err := strconv.Atoi(serverPortStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if serverPortInt == endPortInt {
-			server.Stop("end")
-		}
-	}
+	RegRoomList[endPortInt].Stop("end")
+	delete(RegRoomList, endPortInt)
 
 	return nil
 }

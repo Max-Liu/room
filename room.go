@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/funny/link"
@@ -30,7 +32,11 @@ type ChatRoom struct {
 	Msg     chan []byte
 }
 
-var RegRoomList []*link.Server
+var RegRoomList map[int]*link.Server
+
+func init() {
+	RegRoomList = make(map[int]*link.Server)
+}
 
 func NewChatRoom() *ChatRoom {
 	msg := make(chan []byte)
@@ -48,11 +54,15 @@ func (c *ChatRoom) Start() error {
 	server, err := link.Listen("tcp", "127.0.0.1:0", protocol)
 
 	c.SysInfo = NewRoomSysInfo(pid, server.Listener().Addr().String(), time.Now().Unix())
+	serverPortStr := strings.Split(server.Listener().Addr().String(), ":")[1]
+	serverPortInt, _ := strconv.Atoi(serverPortStr)
 
-	RegRoomList = append(RegRoomList, server)
+	RegRoomList[serverPortInt] = server
 	box := Box{}
 	b, _ := json.Marshal(c.SysInfo)
 	fmt.Printf("%s\n", b)
+	server.State = c.SysInfo
+
 	go server.AcceptLoop(func(session *link.Session) {
 		session.ReadLoop(func(message []byte) {
 			json.Unmarshal(message, &box)
