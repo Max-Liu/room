@@ -1,0 +1,19 @@
+{
+    "development": {
+            "chat": [
+                        {"id":"chat-server-1","host":"127.0.0.1","port":42586},
+                        {"id":"chat-server-2","host":"127.0.0.1","port":3450}
+                    ],
+            "auth": [
+                        {"id":"auth-server-1","host":"127.0.0.1","port":3450},
+                        {"id":"auth-server-2","host":"127.0.0.1","port":3450}
+            ]
+
+      },
+    "production": {
+            "chat": [
+                        {"id":"chat-productionserver-1","host":"127.0.0.1","port":3450}
+                    ]
+      }
+}
+

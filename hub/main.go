@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/rpc"
+	"room"
 )
 
 var client *rpc.Client
@@ -55,8 +56,11 @@ func GetRoomList(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(*reply))
 }
 
+var Env string = "development"
+
 func main() {
-	client, err = rpc.Dial("tcp", "localhost:42586")
+	config := room.InitConfig(Env)
+	client, err = room.Dial("tcp", config.Chat)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,7 +69,7 @@ func main() {
 	http.HandleFunc("/delete", EndRoom)
 	http.HandleFunc("/get_room_num", GetRoomNum)
 	http.HandleFunc("/get_room_List", GetRoomList)
-	err := http.ListenAndServe(":9090", nil)
+	err = http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
