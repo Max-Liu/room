@@ -60,7 +60,9 @@ var Env string = "development"
 
 func main() {
 	config := room.InitConfig(Env)
-	client, err = room.Dial("tcp", config.Chat)
+	address := config.GetDialAddress("chat")
+
+	client, err = rpc.Dial("tcp", address)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -3,8 +3,6 @@ package room
 import (
 	"encoding/json"
 	"log"
-	"net"
-	"net/rpc"
 	"strconv"
 )
 
@@ -65,19 +63,4 @@ func (l *RpcListener) EndChatRoom(line []byte, reply *[]byte) error {
 	delete(RegRoomList, endPortInt)
 
 	return nil
-}
-
-func Dial(network string, chatServers []ChatServer) (*rpc.Client, error) {
-
-	//todo muti chatServers
-	portInt := chatServers[0].Port
-	host := chatServers[0].Host
-	address := host + ":" + strconv.Itoa(portInt)
-
-	conn, err := net.Dial(network, address)
-
-	if err != nil {
-		return nil, err
-	}
-	return rpc.NewClient(conn), nil
 }

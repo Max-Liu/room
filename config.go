@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"strconv"
 )
 
 type Server struct {
@@ -60,5 +61,29 @@ func InitConfig(Env string) *ServerConfig {
 
 	}
 	return serverConfig
+
+}
+
+func (s ServerConfig) GetDialAddress(typeAddress string) string {
+	var address string
+	//todo muti Server address
+
+	switch typeAddress {
+	case "chat":
+		{
+			port := s.Chat[0].Port
+			host := s.Chat[0].Host
+			address = host + ":" + strconv.Itoa(port)
+		}
+	case "auth":
+		{
+
+			port := s.Auth[0].Port
+			host := s.Auth[0].Host
+			address = host + ":" + strconv.Itoa(port)
+		}
+	}
+
+	return address
 
 }
