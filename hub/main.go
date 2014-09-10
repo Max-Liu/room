@@ -73,7 +73,7 @@ func main() {
 	http.HandleFunc("/new_room", NewRoom)
 	http.HandleFunc("/delete", EndRoom)
 	http.HandleFunc("/get_room_num", GetRoomNum)
-	http.HandleFunc("/get_room_List", GetRoomList)
+	http.HandleFunc("/get_room_list", GetRoomList)
 	err = http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
