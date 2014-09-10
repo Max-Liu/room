@@ -31,7 +31,7 @@ type Config struct {
 }
 
 func InitConfig(Env string) *ServerConfig {
-	configByte, err := ioutil.ReadFile("../config.json")
+	configByte, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
