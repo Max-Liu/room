@@ -37,14 +37,15 @@ EnterName:
 	}
 
 	user.CmdContent = "reg"
+	stream := link.JSON{}
+	stream.V = room.Box{user, "user"}
 
-	stream := room.NewStream(room.Box{user, "user"})
 	client.Send(stream)
 
 	go func() {
 		for {
 			<-time.Tick(1 * time.Second)
-			stream = room.NewStream(room.Box{"Sending Ticker~~~", "debug"})
+			stream.V = room.Box{"Sending Ticker~~~", "debug"}
 			client.Send(stream)
 		}
 	}()
@@ -56,7 +57,7 @@ EnterName:
 			goto EnterUserMsg
 		}
 		user.CmdContent = "msg"
-		stream := room.NewStream(room.Box{user, "user"})
+		stream.V = room.Box{user, "user"}
 
 		client.Send(stream)
 	}
