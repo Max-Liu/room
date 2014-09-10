@@ -35,7 +35,6 @@ func InitConfig(Env string) *ServerConfig {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(string(configByte))
 
 	newConfig := new(Config)
 	err = json.Unmarshal(configByte, newConfig)
