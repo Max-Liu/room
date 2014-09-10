@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"room"
+	"time"
 )
 
 var client *rpc.Client
@@ -67,6 +68,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	go Ping()
+
 	http.HandleFunc("/new_room", NewRoom)
 	http.HandleFunc("/delete", EndRoom)
 	http.HandleFunc("/get_room_num", GetRoomNum)
@@ -74,5 +77,18 @@ func main() {
 	err = http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
+	}
+}
+func Ping() {
+	for {
+		var reply *[]byte
+		var line []byte
+		log.Println("Sending heartbeat to server...")
+		err := client.Call("RpcListener.Ping", line, &reply)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Recived heartbeat from server:", string(*reply), "Send next heartbeat in 10 second.")
+		<-time.Tick(10 * time.Second)
 	}
 }
