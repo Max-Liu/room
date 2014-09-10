@@ -39,7 +39,7 @@ func init() {
 }
 
 func NewChatRoom() *ChatRoom {
-	msg := make(chan []byte)
+	msg := make(chan []byte, 1024)
 
 	return &ChatRoom{
 		SysInfo: RoomSysInfo{},
@@ -47,11 +47,14 @@ func NewChatRoom() *ChatRoom {
 	}
 }
 
-func (c *ChatRoom) Start() error {
-	protocol := link.PacketN(2, binary.BigEndian)
-	pid := os.Getpid()
+func (c *ChatRoom) Start() {
+	protocol := link.PacketN(2, binary.LittleEndian)
 
+	pid := os.Getpid()
 	server, err := link.Listen("tcp", "127.0.0.1:0", protocol)
+	if err != nil {
+		log.Println(err)
+	}
 
 	c.SysInfo = NewRoomSysInfo(pid, server.Listener().Addr().String(), time.Now().Unix())
 	serverPortStr := strings.Split(server.Listener().Addr().String(), ":")[1]
@@ -60,7 +63,7 @@ func (c *ChatRoom) Start() error {
 	RegRoomList[serverPortInt] = server
 	box := Box{}
 	b, _ := json.Marshal(c.SysInfo)
-	fmt.Printf("%s\n", b)
+	c.Msg <- b
 	server.State = c.SysInfo
 
 	go server.AcceptLoop(func(session *link.Session) {
@@ -92,13 +95,5 @@ func (c *ChatRoom) Start() error {
 				}
 			}
 		})
-
 	})
-	go func() {
-		for {
-			c.Msg <- b
-		}
-	}()
-
-	return err
 }

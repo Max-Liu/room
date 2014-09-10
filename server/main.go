@@ -28,14 +28,11 @@ func main() {
 
 	for {
 		<-rpcListen.CreateNewRoom
-		newRoom := room.NewChatRoom()
 		go func() {
-			err := newRoom.Start()
-			if err != nil {
-				log.Fatal(err)
-			}
+			newRoom := room.NewChatRoom()
+			newRoom.Start()
+			rpcListen.Msg <- <-newRoom.Msg
 		}()
-		rpcListen.Msg = <-newRoom.Msg
-		rpcListen.HasCreatedRoom <- 1
 	}
+
 }

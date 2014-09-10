@@ -7,20 +7,16 @@ import (
 )
 
 type RpcListener struct {
-	CreateNewRoom  chan int
-	HasCreatedRoom chan int
-	Msg            []byte
+	CreateNewRoom chan int
+	Msg           chan []byte
 }
 
 func NewRpcListener() *RpcListener {
 	createNewRoom := make(chan int)
-	hasCreatedRoom := make(chan int)
-
-	var Msg []byte
+	Msg := make(chan []byte)
 
 	return &RpcListener{
 		createNewRoom,
-		hasCreatedRoom,
 		Msg,
 	}
 
@@ -29,6 +25,11 @@ func NewRpcListener() *RpcListener {
 func (l *RpcListener) GetRoomNum(line []byte, reply *[]byte) error {
 	RoomNumStr := strconv.Itoa(len(RegRoomList))
 	*reply = []byte(RoomNumStr)
+	return nil
+}
+
+func (l *RpcListener) Ping(line []byte, reply *[]byte) error {
+	*reply = []byte("pong~~~")
 	return nil
 }
 
@@ -48,8 +49,7 @@ func (l *RpcListener) GetRoomList(line []byte, reply *[]byte) error {
 
 func (l *RpcListener) CreateChatRoom(line []byte, reply *[]byte) error {
 	l.CreateNewRoom <- 1
-	<-l.HasCreatedRoom
-	*reply = l.Msg
+	*reply = <-l.Msg
 	return nil
 }
 func (l *RpcListener) EndChatRoom(line []byte, reply *[]byte) error {
