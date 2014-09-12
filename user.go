@@ -5,6 +5,9 @@ type User struct {
 	Cmd
 	Msg Message
 }
+type Message struct {
+	Content string
+}
 
 func NewUser() *User {
 	return &User{}

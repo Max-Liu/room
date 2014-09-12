@@ -13,9 +13,9 @@ import (
 
 func main() {
 	log.SetFlags(log.Lshortfile)
-	protocol := link.PacketN(2, binary.BigEndian)
+	protocol := link.PacketN(2, binary.LittleEndian)
 
-	client, err := link.Dial("tcp", "127.0.0.1:52128", protocol)
+	client, err := link.Dial("tcp", "127.0.0.1:55000", protocol)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -52,7 +52,6 @@ EnterName:
 
 	for {
 	EnterUserMsg:
-		fmt.Println("Say:")
 		if _, err := fmt.Scanf("%s\n", &user.Msg.Content); err != nil {
 			goto EnterUserMsg
 		}

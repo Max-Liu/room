@@ -42,16 +42,35 @@ func NewChatRoom() *ChatRoom {
 	msg := make(chan []byte, 1024)
 
 	return &ChatRoom{
-		SysInfo: RoomSysInfo{},
-		Msg:     msg,
+		SysInfo: RoomSysInfo{
+			0,
+			"127.0.0.1:0",
+			0,
+		},
+		Msg: msg,
 	}
+}
+
+func NewDebugChatRoom() *ChatRoom {
+
+	msg := make(chan []byte, 1024)
+
+	return &ChatRoom{
+		SysInfo: RoomSysInfo{
+			0,
+			"localhost:55000",
+			0,
+		},
+		Msg: msg,
+	}
+
 }
 
 func (c *ChatRoom) Start() {
 	protocol := link.PacketN(2, binary.LittleEndian)
 
 	pid := os.Getpid()
-	server, err := link.Listen("tcp", "127.0.0.1:0", protocol)
+	server, err := link.Listen("tcp", c.SysInfo.Addr, protocol)
 	if err != nil {
 		log.Println(err)
 	}
@@ -60,6 +79,8 @@ func (c *ChatRoom) Start() {
 	serverPortStr := strings.Split(server.Listener().Addr().String(), ":")[1]
 	serverPortInt, _ := strconv.Atoi(serverPortStr)
 
+	channel := link.NewChannel(server.Protocol())
+
 	RegRoomList[serverPortInt] = server
 	box := Box{}
 	b, _ := json.Marshal(c.SysInfo)
@@ -67,6 +88,7 @@ func (c *ChatRoom) Start() {
 	server.State = c.SysInfo
 
 	go server.AcceptLoop(func(session *link.Session) {
+		channel.Join(session, nil)
 		session.ReadLoop(func(message []byte) {
 			json.Unmarshal(message, &box)
 			switch box.Kind {
@@ -76,12 +98,12 @@ func (c *ChatRoom) Start() {
 					switch user["CmdContent"] {
 					case "reg":
 						{
-							fmt.Println(user["Name"], "joined the game.")
+							channel.Broadcast(link.Binary(fmt.Sprintln(user["Name"].(string), "joined the game")))
 						}
 					case "msg":
 						{
 							userMsg := user["Msg"].(map[string]interface{})
-							fmt.Println(user["Name"], "Say:", userMsg["Content"])
+							channel.Broadcast(link.Binary(fmt.Sprintln(user["Name"], "Say:", userMsg["Content"])))
 						}
 					}
 				}

@@ -26,6 +26,12 @@ func main() {
 		rpc.Accept(inbound)
 	}()
 
+	go func() {
+		debugRoom := room.NewDebugChatRoom()
+		debugRoom.Start()
+		rpcListen.Msg <- <-debugRoom.Msg
+
+	}()
 	for {
 		<-rpcListen.CreateNewRoom
 		go func() {
