@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"net"
-	"net/rpc"
 	"room"
 )
 
@@ -12,18 +10,7 @@ func main() {
 	rpcListen := room.NewRpcListener()
 
 	go func() {
-		addy, err := net.ResolveTCPAddr("tcp", "127.0.0.1:42586")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		inbound, err := net.ListenTCP("tcp", addy)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		rpc.Register(rpcListen)
-		rpc.Accept(inbound)
+		room.RpcWorker(rpcListen)
 	}()
 
 	go func() {
@@ -32,6 +19,7 @@ func main() {
 		rpcListen.Msg <- <-debugRoom.Msg
 
 	}()
+
 	for {
 		<-rpcListen.CreateNewRoom
 		go func() {

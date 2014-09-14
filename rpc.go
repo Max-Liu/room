@@ -3,6 +3,8 @@ package room
 import (
 	"encoding/json"
 	"log"
+	"net"
+	"net/rpc"
 	"strconv"
 )
 
@@ -20,6 +22,19 @@ func NewRpcListener() *RpcListener {
 		Msg,
 	}
 
+}
+func RpcWorker(l *RpcListener) {
+	addy, err := net.ResolveTCPAddr("tcp", "127.0.0.1:42586")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	inbound, err := net.ListenTCP("tcp", addy)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rpc.Register(l)
+	rpc.Accept(inbound)
 }
 
 func (l *RpcListener) GetRoomNum(line []byte, reply *[]byte) error {
