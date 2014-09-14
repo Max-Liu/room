@@ -66,30 +66,30 @@ func NewDebugChatRoom() *ChatRoom {
 
 }
 
-func (c *ChatRoom) Start() {
+func (chatRoom *ChatRoom) Start() {
 	protocol := link.PacketN(2, binary.LittleEndian)
 
 	pid := os.Getpid()
-	server, err := link.Listen("tcp", c.SysInfo.Addr, protocol)
+	server, err := link.Listen("tcp", chatRoom.SysInfo.Addr, protocol)
 	if err != nil {
 		log.Println(err)
 	}
 
-	c.SysInfo = NewRoomSysInfo(pid, server.Listener().Addr().String(), time.Now().Unix())
+	chatRoom.SysInfo = NewRoomSysInfo(pid, server.Listener().Addr().String(), time.Now().Unix())
 	serverPortStr := strings.Split(server.Listener().Addr().String(), ":")[1]
 	serverPortInt, _ := strconv.Atoi(serverPortStr)
 
 	channel := link.NewChannel(server.Protocol())
 
 	RegRoomList[serverPortInt] = server
-	box := Box{}
-	b, _ := json.Marshal(c.SysInfo)
-	c.Msg <- b
-	server.State = c.SysInfo
+	b, _ := json.Marshal(chatRoom.SysInfo)
+	chatRoom.Msg <- b
+	server.State = chatRoom.SysInfo
 
 	go server.AcceptLoop(func(session *link.Session) {
 		channel.Join(session, nil)
 		session.ReadLoop(func(message []byte) {
+			box := Box{}
 			json.Unmarshal(message, &box)
 			switch box.Kind {
 			case "user":
