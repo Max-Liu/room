@@ -89,12 +89,17 @@ func (chatRoom *ChatRoom) Start() {
 	go server.AcceptLoop(func(session *link.Session) {
 		channel.Join(session, nil)
 		session.ReadLoop(func(message []byte) {
+
 			box := Box{}
-			json.Unmarshal(message, &box)
+			err = Decode(message, &box)
+
+			if err != nil {
+				log.Fatal(err)
+			}
 			switch box.Kind {
 			case "user":
 				{
-					user := box.Object.(map[string]interface{})
+					user := box.Object.(map[interface{}]interface{})
 					switch user["CmdContent"] {
 					case "reg":
 						{
@@ -102,7 +107,7 @@ func (chatRoom *ChatRoom) Start() {
 						}
 					case "msg":
 						{
-							userMsg := user["Msg"].(map[string]interface{})
+							userMsg := user["Msg"].(map[interface{}]interface{})
 							channel.Broadcast(link.Binary(fmt.Sprintln(user["Name"], "Say:", userMsg["Content"])))
 						}
 					}
